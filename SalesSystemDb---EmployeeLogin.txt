@@ -1,0 +1,6 @@
+CREATE TABLE EmployeeLogin (
+    ID       INTEGER NOT NULL
+                     PRIMARY KEY AUTOINCREMENT,
+    Username TEXT    NOT NULL,
+    Password TEXT    NOT NULL
+);

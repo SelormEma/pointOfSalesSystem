@@ -1,0 +1,8 @@
+CREATE TABLE Product (
+    ID        INTEGER     NOT NULL
+                          PRIMARY KEY AUTOINCREMENT,
+    Name      TEXT,
+    Price     DECIMAL (2) NOT NULL,
+    ItemImage BLOB,
+    Stock     INTEGER     NOT NULL
+);

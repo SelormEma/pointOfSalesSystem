@@ -1,0 +1,6 @@
+CREATE TABLE AdminLogin (
+    ID       INTEGER NOT NULL
+                     PRIMARY KEY AUTOINCREMENT,
+    Username TEXT    NOT NULL,
+    Password TEXT    NOT NULL
+);

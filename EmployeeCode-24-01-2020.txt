@@ -1,0 +1,1147 @@
+package ui;
+
+import java.awt.Dimension;
+
+import java.awt.EventQueue;
+import java.awt.Toolkit;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import org.sqlite.util.StringUtils;
+
+import javax.swing.JMenuBar;
+import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.BevelBorder;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JTextField;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+
+import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JLabel;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.Insets;
+
+import javax.swing.JTextPane;
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import java.awt.SystemColor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+
+
+
+@SuppressWarnings("serial")
+public class Employee extends JFrame {
+
+	String tot;
+	private JTextField txtSearch;
+	public JPanel contentPane;
+	//private JTextField textField;
+	Connection conn;
+	PreparedStatement pst,ps = null;
+	ResultSet rs,rst = null;
+	private DefaultListModel<String> mode;
+	String name;
+	int price,quantity;
+	int n;
+	String p;
+	String chkstock;
+	float change,amount,iniamt;
+	double balance=0;
+	
+	float total=0;
+	public JTextArea ReceiptArea = new JTextArea();
+	JList<String> list = new JList<String>();
+	private JTextField txtamount;
+	private JTextField txtquantity;
+	
+	public ArrayList <String> sam=  new ArrayList<String>();
+	Welcome a= new Welcome();
+	String ab=a.usname;
+	float value;
+	int it = 0;
+	int qty = 0;
+	String []arritem = new String[100];
+	int []arrqty = new int[100];
+	
+	static int maxsize = 6;
+	public static String abbreviateString(String input) {
+		if(input.length()<6) {
+			return input;
+		}
+		else {
+			return (input.substring(0, maxsize)).trim();
+		}
+	}
+	
+	
+	//Font font = new Font();
+	
+	
+	//Title Method
+	public void Title() {
+
+		LocalDate date = LocalDate.now();
+		String curdate = date.toString();
+		LocalDateTime mydate = LocalDateTime.now();
+		DateTimeFormatter dtformat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+		String formatteddate = mydate.format(dtformat);
+		
+		ReceiptArea.setRows(10);
+		
+		ReceiptArea.setBackground(SystemColor.inactiveCaptionBorder);
+		ReceiptArea.append("\t"+"MALSAM SUPERMARKET"+"\n"+"\t"+
+				
+				"P.O.BOX 111, KASOA"+"\n"+"\t"+
+				"0276289600 / 0548550553"+"\n"+"\t"+ "RECEIPT"+"\n"+"DATE	"+formatteddate+"\n"+
+				"Item"+"\t"+"Quantity "+"\t"+"Price"+"\t"+"Total"+"\n"+
+				"\t"+"\n");
+	}
+	
+	public void PoweredBy() {
+		ReceiptArea.setBackground(Color.WHITE);
+		
+		ReceiptArea.append(" Powered by SamTec--054 855 0553");
+	}
+
+	//public Employee
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Employee frame = new Employee();
+					frame.setVisible(true);
+					
+					
+
+					UIManager.setLookAndFeel("com.pagosoft.plaf.PgsLookAndFeel");
+					// Is your UI already created? So you will have to update the component-tree
+					// of your current frame (or actually all of them...)
+					SwingUtilities.updateComponentTreeUI(frame);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	/**
+	 * Create the frame.
+	 */
+	@SuppressWarnings("unused")
+	public Employee() {
+		//initComponents();
+		//txtSearch.setRequestFocusEnabled(true);
+		
+//		try {
+//			UIManager.setLookAndFeel("com.jtattoo.plaf.mint.MintLookAndFeel");
+//		} catch (Throwable e) {
+//			e.printStackTrace();
+//		}
+		
+		ReceiptArea.setLineWrap(true);
+		ReceiptArea.setWrapStyleWord(true);
+		ReceiptArea.setMargin(new Insets(20, 20, 20, 20));
+		Title();
+		conn = SqlConnection.Conn();
+		//conn=SqlServerConnection.Conns();
+		mode=new DefaultListModel<String>();
+		
+		
+		
+		
+		list.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		
+		
+		list.setVisible(false);
+		list.setModel(mode);
+		
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		int h =(int) screen.getHeight();
+		int w = (int) screen.getWidth();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1366, 768);
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBackground(UIManager.getColor("MenuBar.background"));
+		setJMenuBar(menuBar);
+		
+		JMenu mnNewMenu = new JMenu("New menu");
+		menuBar.add(mnNewMenu);
+		
+		JMenuItem mntmNewMenuItem = new JMenuItem("New menu item");
+		mnNewMenu.add(mntmNewMenuItem);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(51, 204, 255));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(0, 0, 969, 718);
+		panel.setBackground(UIManager.getColor("Panel.darkBackground"));
+		
+		
+		
+		
+		JLabel lblAmount = new JLabel("AMOUNT:");
+		lblAmount.setBounds(10, 496, 130, 49);
+		panel.add(lblAmount);
+		lblAmount.setForeground(new Color(0, 0, 0));
+		lblAmount.setFont(new Font("Serif", Font.BOLD, 26));
+		
+
+		
+		txtamount = new JTextField();
+		txtamount.setBounds(205, 497, 184, 49);
+		panel.add(txtamount);
+		
+		//Amount action event
+		txtamount.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				txtamount.selectAll();
+			}
+		});
+		
+		txtamount.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		txtamount.setText("0.00");
+		amount=(float) Double.parseDouble(txtamount.getText());
+		
+		txtamount.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		txtamount.setColumns(10);
+		
+		JLabel lblBalance = new JLabel("BALANCE:");
+		lblBalance.setBounds(10, 659, 135, 49);
+		panel.add(lblBalance);
+		lblBalance.setForeground(new Color(0, 0, 0));
+		lblBalance.setFont(new Font("Serif", Font.BOLD, 26));
+		
+		JTextPane textPanebalance = new JTextPane();
+		textPanebalance.setBounds(205, 659, 184, 49);
+		panel.add(textPanebalance);
+		textPanebalance.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		textPanebalance.setEditable(false);
+		
+		
+		
+		
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(969, 0, 396, 723);
+		panel_1.setBackground(UIManager.getColor("Panel.darkBackground"));
+		panel_1.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		
+		JScrollPane ReceiptscrollPane = new JScrollPane();
+		ReceiptscrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		
+		
+		ReceiptscrollPane.setViewportView(ReceiptArea);
+		ReceiptArea.setEditable(false);
+		ReceiptArea.setFont(new Font("Monospaced", Font.BOLD, 13));
+		
+		JLabel lblImage = new JLabel("Image");
+		lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+		lblImage.setForeground(Color.BLACK);
+		lblImage.setFont(new Font("Serif", Font.BOLD, 19));
+		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
+		gl_panel_1.setHorizontalGroup(
+			gl_panel_1.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel_1.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(ReceiptscrollPane, GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE))
+						.addGroup(gl_panel_1.createSequentialGroup()
+							.addGap(56)
+							.addComponent(lblImage, GroupLayout.PREFERRED_SIZE, 276, GroupLayout.PREFERRED_SIZE)))
+					.addContainerGap())
+		);
+		gl_panel_1.setVerticalGroup(
+			gl_panel_1.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addContainerGap(23, Short.MAX_VALUE)
+					.addComponent(ReceiptscrollPane, GroupLayout.PREFERRED_SIZE, 498, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
+					.addComponent(lblImage, GroupLayout.PREFERRED_SIZE, 169, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap())
+		);
+		panel_1.setLayout(gl_panel_1);
+		
+		
+		
+		JScrollPane listscrollPane = new JScrollPane();
+		listscrollPane.setBounds(0, 51, 965, 410);
+	
+		
+		listscrollPane.setViewportView(list);
+		
+		txtSearch = new JTextField();
+		txtSearch.setBounds(0, 0, 881, 51);
+		txtSearch.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		txtSearch.setColumns(10);
+		
+		txtquantity = new JTextField();
+		txtquantity.setBounds(880, 0, 85, 51);
+		txtquantity.setHorizontalAlignment(SwingConstants.TRAILING);
+		txtquantity.setText("1");
+		
+		txtquantity.setFont(new Font("Tahoma", Font.BOLD, 20));
+		txtquantity.setColumns(10);
+		
+		JButton btnPrint = new JButton("PRINT RECEIPT");
+		btnPrint.setBounds(628, 650, 253, 58);
+		btnPrint.setForeground(new Color(51, 204, 255));
+		btnPrint.setBackground(new Color(255, 255, 255));
+		
+		//JTextArea textArea = new JTextArea();
+		JTextPane textPanetotal = new JTextPane();
+		textPanetotal.setBounds(205, 571, 184, 45);
+		panel.add(textPanetotal);
+		textPanetotal.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		textPanetotal.setEditable(false);
+		
+		JLabel lblNewLabel = new JLabel("TOTAL:");
+		lblNewLabel.setBounds(10, 571, 130, 45);
+		panel.add(lblNewLabel);
+		lblNewLabel.setForeground(new Color(0, 0, 0));
+		lblNewLabel.setFont(new Font("Serif", Font.BOLD, 26));
+		
+		//Print Action event
+		btnPrint.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				MessageFormat header = new MessageFormat("Printing in progress");
+				MessageFormat footer = new MessageFormat("Page{0,number,integer}");
+				
+				try {
+					
+					
+					  
+					ReceiptArea.print();
+					
+					//textArea.setText(null);
+					//Title();
+				
+					
+				}
+				catch(java.awt.print.PrinterException ev) {
+					System.err.format("No Printer found", ev.getMessage());
+				} 
+			}
+		});
+		btnPrint.setFont(new Font("Serif", Font.BOLD, 24));
+		
+		
+		
+		JButton btnTotal = new JButton("TOTAL");
+		btnTotal.setBounds(664, 580, 217, 59);
+		
+		
+		btnTotal.setBackground(new Color(255, 255, 255));
+		btnTotal.setForeground(new Color(51, 204, 255));
+		
+		btnTotal.setFont(new Font("Serif", Font.BOLD, 24));
+		btnTotal.setVisible(false);
+		//total button event
+		btnTotal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			
+				tot=""+total;
+				
+				textPanetotal.setText(tot);
+				ReceiptArea.append("----------------------------------------"+"\n");
+				ReceiptArea.append("Total:"+"\t"+"\t"+"\t"+tot+"\n"
+						+"Amt Paid:"+"\t"+"\t"+"\t"+txtamount.getText().trim()+"\n"
+						+"Change:"+"\t"+"\t"+"\t"+textPanebalance.getText()+"\n");
+				
+				PoweredBy();
+			}
+		});
+		
+		
+		
+		
+		
+		JButton btnClearAll = new JButton("CLEAR ALL");
+		btnClearAll.setBounds(664, 496, 217, 59);
+		
+		
+		
+		btnClearAll.setForeground(new Color(51, 204, 255));
+		btnClearAll.setFont(new Font("Serif", Font.BOLD, 24));
+		btnClearAll.setBackground(new Color(255, 255, 255));
+		
+		
+		
+		
+		
+		
+		
+		
+		//CLEAR ALL ACTION EVENT
+		btnClearAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				txtSearch.setText(null);
+				txtamount.setText("0.00");
+				txtquantity.setText("1");
+				textPanebalance.setText("0.00");
+				textPanetotal.setText("0.00");
+				ReceiptArea.setText(null);
+				list.setSelectedIndex(0);
+				txtSearch.requestFocus();
+				total=0;
+				Title();
+				
+			}
+		});
+		
+		
+		/// Clear All Key Pressed Event
+				btnClearAll.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyPressed(KeyEvent arg0) {
+						if(arg0.getKeyCode()==10) {
+						total=0;
+						txtSearch.setText(null);
+						txtamount.setText("0.00");
+						txtquantity.setText("1");
+						textPanebalance.setText("0.00");
+						textPanetotal.setText("0.00");
+						ReceiptArea.setText(null);
+						list.setSelectedIndex(0);
+						txtSearch.requestFocus();
+						
+						
+						Title();
+						}
+						
+					}
+				});
+		
+		
+		//set search bar action
+				txtSearch.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyReleased(KeyEvent arg0) {
+						try {
+							mode.removeAllElements();
+							String val = txtSearch.getText().trim();
+						String query ="Select * from PRODUCT where Name like '%"+val+"%'";
+						pst = conn.prepareStatement(query);
+						rs=pst.executeQuery();
+						
+						if(!(val=="")) {
+							list.setVisible(true);
+
+							while(rs.next()) {
+								
+								 name= rs.getString("Name");
+								// System.out.println(name);
+								mode.addElement(name);
+								list.setSelectedIndex(0);
+								//comboBox.addItem(rs.getString("Name"));
+								
+								
+							}
+							
+							pst.close();
+							rs.close();
+						}
+						else {
+							list.setVisible(true);
+
+							while(rs.next()) {
+								
+								
+								 name= rs.getString("");
+								mode.addElement(name);
+								list.setSelectedIndex(0);
+								//comboBox.addItem(rs.getString("Name"));
+								
+								
+							}
+							
+							pst.close();
+							rs.close();
+						}
+						
+					} catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+					}
+							//comboBox.setSelectedItem(textField.getText());
+							
+							//System.out.println(comboBox.toString());
+						
+						
+						finally{
+							try{
+							rs.close();
+							pst.close();
+
+							}
+							catch(Exception e){
+							}
+							}
+					
+					}
+					@Override
+					public void keyTyped(KeyEvent e) {
+						
+						char ch = e.getKeyChar();
+						
+						char dot = '.';
+						if((Character.isDigit(ch))) {
+							
+							
+							e.consume();
+							}
+						
+					}
+				});
+				
+				//String selitem = list.getSelectedValue();
+				txtSearch.addKeyListener(new KeyAdapter() {
+					@Override
+					
+					
+					
+					
+					public void keyPressed(KeyEvent e) {
+						
+						
+						
+						
+						
+						if(e.getKeyCode()==10) {
+							
+							try {
+								
+								
+								
+								ps = conn.prepareStatement("Select Price from PRODUCT where Name=?");
+								ps.setString(1, list.getSelectedValue());
+								ResultSet rst=ps.executeQuery();
+								value = rst.getFloat("Price");
+								
+//								p=rst.getString("Price").trim();
+//								k = Double.parseDouble(p);
+								
+								rst.close();
+								ps.close();
+								
+								ps = conn.prepareStatement("Select Stock from Product where Name=?");
+								ps.setString(1, list.getSelectedValue());
+								rst=ps.executeQuery();
+								
+								String chkstock = rst.getString("Stock");
+								System.out.println("Current Stock is "+ chkstock);
+								rst.close();
+								ps.close();
+								
+								
+								
+								
+							} catch (Exception e1) {
+								
+								// TODO: handle exception
+							}
+							
+							finally{
+								try{
+									
+								rst.close();
+								ps.close();
+
+								}
+								catch(Exception e2){
+								}
+								}
+							
+//							sam.add(" "+list.getSelectedValue()+"\t"+"\t"+txtquantity.getText()+"\t"+"\t"+p+"\n");
+//							ReceiptArea.append(sam.get(n));
+//							n++;
+							//sam.clear();
+							
+							
+							quantity=Integer.parseInt(txtquantity.getText());
+							//init = (float) (quantity*Double.parseDouble(p));
+							
+							if(quantity>(Integer.parseInt(chkstock))) {
+								
+								JOptionPane.showMessageDialog(null, list.getSelectedValue()+" In Stock : "+ chkstock);
+								
+							}
+							else {
+							iniamt = (quantity*value);
+							total+= iniamt;
+							if(list.getSelectedValue()!=null) {
+								
+							ReceiptArea.append(abbreviateString(list.getSelectedValue())+"\t"+txtquantity.getText()+"\t"+"\t"+value+"\t"+iniamt+"\n");
+							
+							arritem[it]=list.getSelectedValue();
+							arrqty[qty]=Integer.parseInt(txtquantity.getText());
+							it++;
+							qty++;
+							
+							txtSearch.setText(null);
+							textPanetotal.setText(""+total);
+							}
+							else {
+								JOptionPane.showMessageDialog(null, "Nothing selected");
+							}
+							}
+						}
+//						if(e.getKeyCode()==40) {
+//							textField.setFocusable(false);
+//						}
+//						else if(e.getKeyCode()==38) {
+//							textField.setFocusable(true);
+//						}
+						
+						if(e.getKeyCode()==39) {
+							txtquantity.requestFocus();
+							txtquantity.selectAll();
+						}
+						if(e.getKeyCode()==40) {
+							list.requestFocus();
+							
+						}
+						
+						
+					}
+				});
+		
+				
+				// list key action listener
+				list.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyPressed(KeyEvent e) {
+//						if(list.getSelectedIndex()>-1) {
+//						
+//							try {
+//								String sel = list.getSelectedValue();
+//								String sql = "Select ItemImage from Product where Name="+sel+"";
+//								pst = conn.prepareStatement(sql);
+//								rs= pst.executeQuery();
+//								
+//								if(rs.next()) {
+//									//DisplayMemImage.setIcon(format);
+//									byte[] imagedatasi = rs.getBytes("ItemImage");
+//									
+//									ImageIcon formatsasi = new ImageIcon(imagedatasi);
+//									
+//									Image imgs = formatsasi.getImage();
+//				
+//									Image newImg = imgs.getScaledInstance(lblImage.getWidth(), lblImage.getHeight(), Image.SCALE_SMOOTH);
+//									
+//									 formatsasi = new ImageIcon(newImg);
+//									 
+//									 lblImage.setIcon(formatsasi);
+//								}
+//							} catch (SQLException e1) {
+//								// TODO Auto-generated catch block
+//								e1.printStackTrace();
+//							}
+//							
+//						}
+						if(e.getKeyCode()==10) {
+							
+							
+							try {
+								
+								pst = conn.prepareStatement("Select Price from Product where Name=?");
+								pst.setString(1, list.getSelectedValue());
+								rs=pst.executeQuery();
+							
+								
+								value = rs.getFloat("Price");
+//								p=rs.getString("Price").trim();
+//								k = Double.parseDouble(p);
+
+								//System.out.println(p);
+								rs.close();
+								pst.close();
+								
+								pst = conn.prepareStatement("Select Stock from Product where Name=?");
+								pst.setString(1, list.getSelectedValue());
+								rs=pst.executeQuery();
+								
+								String chkstock = rs.getString("Stock");
+								System.out.println("Current Stock is "+ chkstock);
+								rs.close();
+								pst.close();
+								
+								quantity=Integer.parseInt(txtquantity.getText());
+								//init = (float) (quantity*Double.parseDouble(p));
+								//total+=quantity*Double.parseDouble(p);
+
+								if(quantity>(Integer.parseInt(chkstock))) {
+									
+									JOptionPane.showMessageDialog(null, list.getSelectedValue()+" In Stock : "+ chkstock);
+									
+								}
+								else {
+								
+								iniamt = (quantity*value);
+								total+= iniamt;
+								
+								if(list.getSelectedValue()!=null) {
+									ReceiptArea.append(abbreviateString(list.getSelectedValue())+"\t"+txtquantity.getText()+"\t"+"\t"+value+"\t"+iniamt+"\n");
+									
+									arritem[it]=list.getSelectedValue();
+									arrqty[qty]=Integer.parseInt(txtquantity.getText());
+									it++;
+									qty++;
+									txtSearch.setText(null);
+									textPanetotal.setText(""+total);
+									}
+									else {
+										JOptionPane.showMessageDialog(null, "Nothing selected");
+									}
+								}
+								
+							} catch (Exception e1) {
+								
+								// TODO: handle exception
+							}
+							
+							finally{
+								try{
+									//rs=null;
+								rs.close();
+								pst.close();
+
+								}
+								catch(Exception e2){
+								}
+								}
+							
+							//ReceiptArea.append(" "+list.getSelectedValue()+"\t"+"\t"+txtquantity.getText()+"\t"+"\t"+p+"\n");
+//							sam.add(" "+list.getSelectedValue()+"\t"+"\t"+txtquantity.getText()+"\t"+"\t"+p+"\n");
+//							ReceiptArea.append(sam.get(n));
+//							n++;
+							//sam.clear();
+							//txtSearch.setText(null);
+							//textPanetotal.setText(""+total);
+							
+							
+							
+							
+							
+							
+						}
+						if(e.getKeyCode()==37) {
+							txtSearch.requestFocus();
+							txtSearch.selectAll();
+						}
+						if(e.getKeyCode()==39) {
+							txtquantity.requestFocus();
+							txtquantity.selectAll();
+							
+						}
+					}
+				});
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				//QUANTITY TEXTFIELD ACTION EVENT
+				
+				txtquantity.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyPressed(KeyEvent e) {
+						
+						
+						if(e.getKeyCode()==10) {
+							
+							try {
+								
+								ps = conn.prepareStatement("Select Price from PRODUCT where Name=?");
+								ps.setString(1, list.getSelectedValue());
+							ResultSet rst=ps.executeQuery();
+							
+							value = rst.getFloat("Price");
+//								p=rst.getString("Price").trim();
+//								k = Double.parseDouble(p);
+
+								rst.close();
+								ps.close();
+								
+								
+								ps = conn.prepareStatement("Select Stock from Product where Name=?");
+								ps.setString(1, list.getSelectedValue());
+								rst=ps.executeQuery();
+								
+								 chkstock = rst.getString("Stock");
+								System.out.println("Current Stock is "+ chkstock);
+								rst.close();
+								ps.close();
+								
+								
+								
+								
+							} catch (Exception e1) {
+								
+								// TODO: handle exception
+							}
+							
+							finally{
+								try{
+									
+								rst.close();
+								ps.close();
+
+								}
+								catch(Exception e2){
+								}
+								}
+							
+							//ReceiptArea.append(" "+list.getSelectedValue()+"\t"+"\t"+txtquantity.getText()+"\t"+"\t"+p+"\n");
+//							sam.add(" "+list.getSelectedValue()+"\t"+"\t"+txtquantity.getText()+"\t"+"\t"+p+"\n");
+//							ReceiptArea.append(sam.get(0));
+//							n++;
+							//sam.clear();
+							//txtSearch.setText(null);
+							//txtquantity.setText("1");
+							//textPanetotal.setText(""+total);
+							
+							
+							quantity=Integer.parseInt(txtquantity.getText());
+							if(quantity>(Integer.parseInt(chkstock))) {
+								
+								JOptionPane.showMessageDialog(null, list.getSelectedValue()+" In Stock : "+ chkstock);
+								
+							}
+							else {
+								
+								//init = (float) (quantity*Double.parseDouble(p));
+								//total+=quantity*Double.parseDouble(p);
+								iniamt = (float) (quantity*value);
+								total+= iniamt;
+								
+								if(list.getSelectedValue()!=null) {
+									
+									ReceiptArea.append(abbreviateString(list.getSelectedValue())+"\t"+txtquantity.getText()+"\t"+"\t"+value+"\t"+iniamt+"\n");
+									
+									arritem[it]=list.getSelectedValue();
+									arrqty[qty]=Integer.parseInt(txtquantity.getText());
+									it++;
+									qty++;
+									txtSearch.setText(null);
+									textPanetotal.setText(""+total);
+									txtquantity.setText("1");
+									
+									}
+									else {
+										JOptionPane.showMessageDialog(null, "Nothing selected");
+									}
+								
+							}
+							
+						}
+//						if(e.getKeyCode()==40) {
+//							textField.setFocusable(false);
+//						}
+//						else if(e.getKeyCode()==38) {
+//							textField.setFocusable(true);
+//						}
+						
+						
+						
+						
+						if(e.getKeyCode()==40) {
+							list.requestFocus();
+							txtquantity.setText("1");
+						}
+						
+						if(e.getKeyChar()=='s'||e.getKeyChar()=='S') {
+							
+							txtSearch.requestFocus();
+							txtquantity.setText("1");
+							
+						}
+						
+						if(e.getKeyChar()=='l'||e.getKeyChar()=='L') {
+							
+							list.requestFocus();
+							txtquantity.setText("1");
+							
+						}
+					}
+					@Override
+					public void keyTyped(KeyEvent e) {
+						
+						char ch = e.getKeyChar();
+						
+						char dot = '.';
+						if((!Character.isDigit(ch))) {
+							
+							
+							e.consume();
+							}
+					}
+				});
+				contentPane.setLayout(null);
+				contentPane.add(panel);
+				
+					
+								//Amount text field event
+								
+								txtamount.addActionListener(new ActionListener() {
+									public void actionPerformed(ActionEvent arg0) {
+										
+										txtamount.selectAll();
+										if(txtamount.isCursorSet()) {
+											txtamount.selectAll();
+										}
+									}
+								});
+								
+								
+								txtamount.addKeyListener(new KeyAdapter() {
+								
+									@Override
+									
+									public void keyReleased(KeyEvent arg0) {
+										
+										balance=(Double.parseDouble(txtamount.getText()))-total;
+										
+										String bal=""+balance;
+										textPanebalance.setText(bal);
+										list.setSelectedIndex(0);
+									}
+									
+									
+									
+									//@Override
+									public void keyPressed(KeyEvent arg0) {
+									
+										if(arg0.getKeyCode()==10) {
+											
+											for(int m=0;m<qty;m++) {
+												String ite = arritem[m];
+												
+												try {
+													
+													ps = conn.prepareStatement("Select Stock from PRODUCT where Name=?");
+													ps.setString(1, ite);
+												ResultSet rst=ps.executeQuery();
+												
+													int stock=rst.getInt("Stock");
+													
+													System.out.println(ite+" "+ stock);
+													stock= stock - arrqty[m];
+													
+													
+													String sql ="Update Product Set Stock=? where Name=?";
+													
+													
+													
+													try {
+														//PreparedStatement pst = null;
+														pst =conn.prepareStatement(sql);
+														pst.setInt(1, stock);
+														pst.setString(2, ite);
+														
+														pst.execute();
+														//JOptionPane.showMessageDialog(null, "Saved Successfully");
+														//JOptionPane.showMessageDialog(null, "Update Successful");
+														pst.close();
+														
+													} catch (SQLException e1) {
+														// TODO Auto-generated catch block
+														e1.printStackTrace();
+													}
+													
+													
+													finally{
+														try{
+														rs.close();
+														pst.close();
+
+														}
+														catch(Exception e){
+														}
+														}
+												
+													System.out.println(ite+" "+ stock);
+													rst.close();
+													ps.close();
+													
+													
+												} catch (Exception e1) {
+													
+													// TODO: handle exception
+												}
+												
+												finally{
+													try{
+														
+													rst.close();
+													ps.close();
+
+													}
+													catch(Exception e2){
+													}
+													}
+												
+											}
+											
+											
+											it=0;
+											qty=0;
+											
+											arritem=null;
+//											System.out.println(it);
+//
+//											System.out.println(qty);
+//											System.out.println(Arrays.toString(arritem));
+//											System.out.println(Arrays.toString(arrqty));
+
+											for(ActionListener a: btnTotal.getActionListeners()) {
+									        	   a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+									           }
+											
+											
+											
+											
+											for(ActionListener b: btnPrint.getActionListeners()) {
+									        	   b.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+									           }
+											
+											btnClearAll.requestFocus();
+											total=0;
+											
+											
+										}
+										
+									}
+									
+								});
+								
+							
+				
+								//List Action Event
+//								list.addListSelectionListener(new ListSelectionListener() {
+//									public void valueChanged(ListSelectionEvent evt) {
+//										
+//									
+//									if(evt.getValueIsAdjusting()==true) {
+//										
+//										if(list.getSelectedIndex()>=0) {
+//											//String sel = list.getSelectedValue().trim();
+//											//String sql = "Select ID from Product where Name="+sel+"";
+//											try {
+//												pst = conn.prepareStatement("Select ItemImage from Product where Name=?");
+//												pst.setString(1, list.getSelectedValue());
+//												rs=pst.executeQuery();
+//												
+//												
+//												
+//												if(rs.next()) {
+//													//DisplayMemImage.setIcon(format);
+//													byte[] imagedatasi = rs.getBytes("ItemImage");
+//													
+//													ImageIcon formatsasi = new ImageIcon(imagedatasi);
+//													
+//													Image imgs = formatsasi.getImage();
+//								
+//													Image newImg = imgs.getScaledInstance(lblImage.getWidth(), lblImage.getHeight(), Image.SCALE_SMOOTH);
+//													
+//													 formatsasi = new ImageIcon(newImg);
+//													 
+//													 lblImage.setIcon(formatsasi);
+//												}
+//											} catch (SQLException e1) {
+//												// TODO Auto-generated catch block
+//												e1.printStackTrace();
+//											}
+//											
+//											finally {
+//												try {
+//													rs.close();
+//													pst.close();
+//												} catch (Exception e) {
+//													// TODO: handle exception
+//												}
+//											}
+//											
+//										}
+//										
+//									}
+//									
+//										
+//									}
+//								});								
+			
+				
+				//Select only one item in list
+				list.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+								
+				contentPane.add(panel_1);
+				setExtendedState(MAXIMIZED_BOTH);
+				setResizable(false);
+				setLocationRelativeTo(null);
+				panel.setLayout(null);
+				panel.add(btnPrint);
+				panel.add(btnTotal);
+				panel.add(btnClearAll);
+				panel.add(listscrollPane);
+				panel.add(txtSearch);
+				panel.add(txtquantity);
+				
+				
+	}
+}
+	
+	
+	
+	
+
+
+

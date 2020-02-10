@@ -1,0 +1,5 @@
+CREATE TABLE DailySales (
+    DATE  DATE PRIMARY KEY,
+    TOTAL TEXT DEFAULT (0),
+    Today TEXT DEFAULT (date() ) 
+);
